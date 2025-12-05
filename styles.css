@@ -37,6 +37,10 @@ nav a:hover {
   text-decoration: underline;
   color: #a00;
 }
+nav a.active {
+  color: #a00;
+  text-decoration: underline;
+}
 .content {
   padding: 20px;
 }
