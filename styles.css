@@ -1,0 +1,90 @@
+ <style>
+      body {
+          font-family: Arial, sans-serif;
+          background-color: #f2f2f2;
+          color: #333;
+          margin: 0;
+          padding: 0;
+          overflow-x: hidden;
+      }
+      header {
+          background-color: #c8102e; /* 赤色 */
+          color: white;
+          padding: 20px;
+          text-align: center;
+          position: relative;
+          animation: slideDown 1s ease-out;
+      }
+      @keyframes slideDown {
+          from { top: -100px; }
+          to { top: 0; }
+      }
+      nav {
+          margin: 20px 0;
+          text-align: center;
+          animation: fadeIn 2s ease-in;
+      }
+      @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+      }
+      nav a {
+          color: #c8102e;
+          text-decoration: none;
+          margin: 0 15px;
+          font-weight: bold;
+      }
+      nav a:hover {
+          text-decoration: underline;
+          color: #a00;
+      }
+      .content {
+          padding: 20px;
+      }
+      section {
+          margin-bottom: 40px;
+          opacity: 0;
+          transform: translateY(20px);
+          transition: opacity 1s ease-out, transform 1s ease-out;
+      }
+      section.visible {
+          opacity: 1;
+          transform: translateY(0);
+      }
+      footer {
+          text-align: center;
+          padding: 10px;
+          background-color: #c8102e;
+          color: white;
+          position: relative;
+          bottom: 0;
+          width: 100%;
+          animation: slideUp 1s ease-out;
+      }
+      @keyframes slideUp {
+          from { bottom: -100px; }
+          to { bottom: 0; }
+      }
+      .sidebar {
+          position: fixed;
+          top: 0;
+          right: -250px;
+          width: 250px;
+          height: 100%;
+          background-color: #c8102e;
+          transition: right 0.5s ease-out;
+      }
+      .sidebar:hover {
+          right: 0;
+      }
+      .sidebar a {
+          color: white;
+          text-decoration: none;
+          display: block;
+          padding: 15px;
+          text-align: center;
+      }
+      .sidebar a:hover {
+          background-color: #a00;
+      }
+ 
