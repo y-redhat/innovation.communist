@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     /* ============================================================
        4) Python互換復号JS
-    ============================================================ */
+    ============================================================ 
     async function decryptPyCipher(b64, password){
         const SALT_LEN=32, NONCE_LEN=24, DK_LEN=96, ITER=200000;
         const raw = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
@@ -87,12 +87,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             new Uint8Array([...encKey, ...nonce])));
 
         return new TextDecoder().decode(cipher.map((v,i)=>v^(ks[i%64])));
-    }
+    }  */
 
 
     /* ================================
        🔐 ログイン認証
-    ================================== */
+    ================================== 
     const CIPHER_TEXT = "c+Okz1wWJRyjgpVmHpSzwb+JA3Bmmde8QhyFrhl/zaODF8HNHhRnBya4BAZAyCYMoMhZYMf2iHkkt5OAfqjRsN/vAjLK+gDzx4WcPWiG8rW7fZvRihliF+Zx0QkT0j7L/nt6NDzdnYtvdNp2Lm8kaksM7HsJ0TYoVPHVXFg3UVQ=";
 
     document.getElementById("loginForm")?.addEventListener("submit", async e => {
@@ -108,6 +108,83 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+*/
+    const ITER      = 200000;   // ← Pythonと同じ
+const SALT_LEN  = 32;
+const NONCE_LEN = 24;
+const DK_LEN    = 96;       // 48byte ENC + 48byte MAC
+
+// 文字列 ⇄ バイト列
+const te = new TextEncoder(), td=new TextDecoder();
+const b2a=b=>btoa(String.fromCharCode(...b));
+const a2b=a=>Uint8Array.from(atob(a),c=>c.charCodeAt(0));
+
+// ===== PBKDF2で鍵導出 =====
+async function deriveKeys(pass, salt){
+  let key = await crypto.subtle.importKey("raw", te.encode(pass),"PBKDF2",false,["deriveBits"]);
+  let bits = await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt,iterations:ITER},key,DK_LEN*8);
+  bits = new Uint8Array(bits);
+  return [bits.slice(0,48), bits.slice(48,96)];
+}
+
+// ===== SHA512(enc_key+nonce) 生成 =====
+async function sha512(data){
+  return new Uint8Array(await crypto.subtle.digest("SHA-512",data));
+}
+
+// ===== HMAC-SHA512 =====
+async function hmac(key,data){
+  let kobj = await crypto.subtle.importKey("raw",key,{name:"HMAC",hash:"SHA-512"},false,["sign"]);
+  return new Uint8Array(await crypto.subtle.sign("HMAC",kobj,data));
+}
+
+// ======== 暗号化 (Python互換) =========
+async function encrypt(text,pass){
+  const salt  = crypto.getRandomValues(new Uint8Array(SALT_LEN));
+  const nonce = crypto.getRandomValues(new Uint8Array(NONCE_LEN));
+  const [enc,mac] = await deriveKeys(pass,salt);
+
+  const plain  = te.encode(text);
+  const stream = await sha512(new Uint8Array([...enc,...nonce]));
+  const ks = new Uint8Array(plain.length);
+  for(let i=0;i<plain.length;i++) ks[i]=stream[i%64];
+
+  const cipher = plain.map((v,i)=>v^ks[i]);
+  const tag = await hmac(mac,new Uint8Array([...salt,...nonce,...cipher]));
+
+  return b2a(new Uint8Array([...salt,...nonce,...cipher,...tag]));
+}
+
+// ========= 復号(Python互換) ==========
+async function decrypt(b64,pass){
+  const raw = a2b(b64);
+  const salt   = raw.slice(0,SALT_LEN);
+  const nonce  = raw.slice(SALT_LEN,SALT_LEN+NONCE_LEN);
+  const cipher = raw.slice(SALT_LEN+NONCE_LEN,-64);
+  const tag    = raw.slice(-64);
+
+  const [enc,mac] = await deriveKeys(pass,salt);
+  const good = await hmac(mac,new Uint8Array([...salt,...nonce,...cipher]));
+
+  if([...good].some((v,i)=>v!==tag[i])) return "❌ パスワード不一致";
+
+  const stream = await sha512(new Uint8Array([...enc,...nonce]));
+  const ks = new Uint8Array(cipher.length);
+  for(let i=0;i<cipher.length;i++) ks[i]=stream[i%64];
+
+  return td.decode(cipher.map((v,i)=>v^ks[i]));
+}
+
+// ===== UI操作 =====
+async function goEncrypt(){
+  out.textContent = await encrypt(input.value,pass.value);
+}
+async function goDecrypt(){
+  out.textContent = await decrypt(input.value,pass.value);
+}
+</script>
+</body>
+</html>
 
     /* ============================================================
        5) お問い合わせフォーム（保存／表示のみ）
