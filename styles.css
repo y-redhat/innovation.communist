@@ -1,6 +1,179 @@
 /* ==================================
-   Global Theme Variables
+   Global Theme Variables (共産主義カラー)
 ================================== */
+:root {
+  --primary: #c8102e;       /* 革命赤 */
+  --primary-dark: #8b0000;  /* 深紅 */
+  --accent: #ffd700;        /* 黄金色 */
+  --text: #f5f5f5;          /* 明るいテキスト */
+  --bg: #1a1a1a;            /* 暗背景 */
+  --radius: 6px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.5);
+  --transition: 0.3s ease;
+}
+
+/* ==================================
+   Base
+================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Noto Sans JP', 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+}
+
+/* ==================================
+   Header / Nav
+================================== */
+header {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: var(--accent);
+  padding: 2.5rem 1rem;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  box-shadow: var(--shadow);
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  background: #222;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+}
+
+nav a {
+  color: var(--accent);
+  font-weight: 700;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+nav a:hover {
+  color: var(--primary);
+  transform: translateY(-2px);
+}
+
+/* ==================================
+   Main Layout
+================================== */
+.content {
+  max-width: 1100px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+
+section {
+  background: #2b2b2b;
+  padding: 2rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 3rem;
+  opacity: 0;
+  animation: fade-in 0.6s ease forwards;
+}
+
+section:not(:first-child) {
+  animation-delay: 0.2s;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==================================
+   Buttons
+================================== */
+.join-btn {
+  background: var(--primary);
+  color: var(--accent);
+  border: 2px solid var(--accent);
+  padding: 0.8rem 1.6rem;
+  border-radius: var(--radius);
+  font-weight: bold;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.join-btn:hover {
+  background: var(--primary-dark);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+/* ==================================
+   Sidebar (クリック式)
+================================== */
+.sidebar {
+  position: fixed;
+  top: 0; right: -300px;
+  width: 300px; height: 100vh;
+  background: #111;
+  color: var(--accent);
+  padding-top: 4rem;
+  transition: right 0.4s ease;
+  z-index: 1000;
+}
+
+.sidebar a {
+  display: block;
+  padding: 1rem 1.2rem;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid #333;
+  transition: var(--transition);
+}
+
+.sidebar a:hover {
+  background: var(--primary-dark);
+  color: #fff;
+}
+
+.sidebar.open { right: 0; }
+
+/* トグルボタン */
+.sidebar-toggle {
+  position: fixed;
+  right: 15px; top: 15px;
+  background: var(--primary);
+  color: var(--accent);
+  padding: 0.7rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 1500;
+  transition: var(--transition);
+}
+
+.sidebar-toggle:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+/* ==================================
+   Responsive
+================================== */
+@media (max-width: 768px) {
+  nav { flex-wrap: wrap; gap: 1rem; }
+  .sidebar { width: 80%; }
+}
+
+
+
+
+/* ==================================
+   Global Theme Variables
+================================== 
 :root {
   --primary: #c8102e;
   --primary-dark: #8a0b1f;
@@ -10,9 +183,9 @@
   --shadow: 0 2px 15px rgba(0,0,0,0.08);
 }
 
-/* ==================================
+ ==================================
    Base
-================================== */
+================================== 
 * {
   margin: 0;
   padding: 0;
@@ -28,7 +201,7 @@ body {
 
 /* ==================================
    Header / Nav
-================================== */
+================================== 
 header {
   background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: #fff;
@@ -62,7 +235,7 @@ nav a:hover {
 
 /* ==================================
    Main Layout
-================================== */
+================================== 
 .content {
   max-width: 1100px;
   margin: 3rem auto;
@@ -90,7 +263,7 @@ section:not(:first-child) {
 
 /* ==================================
    Buttons
-================================== */
+================================== 
 .join-btn {
   background: var(--primary);
   color: #fff;
@@ -110,7 +283,7 @@ section:not(:first-child) {
 
 /* ==================================
    Sidebar (UX改善: hover→click式)
-================================== */
+================================== 
 .sidebar {
   position: fixed;
   top: 0; right: -300px;
@@ -133,6 +306,7 @@ section:not(:first-child) {
 .sidebar.open { right: 0; }
 
 /* トグルボタン */
+/*
 .sidebar-toggle {
   position: fixed;
   right: 15px; top: 15px;
@@ -144,10 +318,11 @@ section:not(:first-child) {
   z-index: 1500;
 }
 
-/* ==================================
+==================================
    Responsive
-================================== */
+================================== 
 @media (max-width: 768px) {
   nav { flex-wrap: wrap; gap: 1rem; }
   .sidebar { width: 80%; }
 }
+*/
