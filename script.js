@@ -66,73 +66,56 @@ document.addEventListener('DOMContentLoaded', async () => {
     /* ============================================================
        4) AES + ナップザック暗号化 / 復号関数
     ============================================================ */
-    const cryptoKey = 'secureKey123'; // AESキー
-    const publicKey = [2, 3, 7, 14, 30, 57, 120, 251]; // ナップザック公開鍵
-    const privateKey = [1, 2, 4, 8, 16, 32, 64, 128]; // ナップザック秘密鍵
+    const KEY_DATA = [
+        193,102,88,44,231,99,201, 184,55,12,78,201,
+        44,155,211,95,121,12,80, 199,88,192,14,52
+    ]; // ← これが Knapsack 生成種 ＋ AES鍵素材
 
-    // AES暗号化
-    const aesEncrypt = async (key, plaintext) => {
-        const iv = crypto.getRandomValues(new Uint8Array(16));
-        const cipher = new TextEncoder().encode(plaintext);
-        const cryptoKey = await crypto.subtle.importKey(
-            'raw',
-            new TextEncoder().encode(key),
-            { name: 'AES-CFB' },
-            false,
-            ['encrypt']
-        );
-        const encrypted = await crypto.subtle.encrypt({ name: 'AES-CFB', iv }, cryptoKey, cipher);
-        const combined = new Uint8Array(iv.length + encrypted.byteLength);
-        combined.set(iv);
-        combined.set(new Uint8Array(encrypted), iv.length);
-        return combined;
-    };
+    function deriveKeys(){
+        let aesKey = new Uint8Array(KEY_DATA.map(x=> (x*7+13)%256 ));
+        let knapsack = KEY_DATA.map((x,i)=> x*(i+2)+17);
+        return {aesKey,knapsack};
+    }
+    const {aesKey,knapsack} = deriveKeys();
 
-    // AES復号
-    const aesDecrypt = async (key, ciphertext) => {
-        const iv = ciphertext.slice(0, 16);
-        const encrypted = ciphertext.slice(16);
-        const cryptoKey = await crypto.subtle.importKey(
-            'raw',
-            new TextEncoder().encode(key),
-            { name: 'AES-CFB' },
-            false,
-            ['decrypt']
-        );
-        const decrypted = await crypto.subtle.decrypt({ name: 'AES-CFB', iv }, cryptoKey, encrypted);
-        return new TextDecoder().decode(decrypted);
-    };
+    /* ---- Knapsack encrypt ---- */
+    function knapsackEncrypt(text){
+        return text.split("").map(ch=>{
+            let code=ch.charCodeAt(0),sum=0;
+            for(let i=0;i<8;i++) if(code&(1<<i)) sum+=knapsack[i];
+            return sum.toString(36);
+        }).join("-");
+    }
+    function knapsackDecrypt(encrypted){
+        return encrypted.split("-").map(block=>{
+            let target=parseInt(block,36),val=0;
+            for(let i=7;i>=0;i--) if(target>=knapsack[i]){target-=knapsack[i];val|=(1<<i);}
+            return String.fromCharCode(val);
+        }).join("");
+    }
 
-    // ナップザック暗号化
-    const knapsackEncrypt = (publicKey, plaintext) => {
-        return [...plaintext].reduce((sum, char, i) => sum + publicKey[i % publicKey.length] * char.charCodeAt(0), 0);
-    };
+    /* ---- AES ---- */
+    async function aesEncrypt(text,key=aesKey){
+        let cryptoKey=await crypto.subtle.importKey("raw",key,{name:"AES-GCM"},false,["encrypt"]);
+        let iv=crypto.getRandomValues(new Uint8Array(12));
+        let enc=await crypto.subtle.encrypt({name:"AES-GCM",iv},cryptoKey,new TextEncoder().encode(text));
+        return btoa([...iv,...new Uint8Array(enc)].map(b=>String.fromCharCode(b)).join(""));
+    }
+    async function aesDecrypt(encoded,key=aesKey){
+        let data=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
+        let iv=data.slice(0,12),cipher=data.slice(12);
+        let cryptoKey=await crypto.subtle.importKey("raw",key,{name:"AES-GCM"},false,["decrypt"]);
+        let dec=await crypto.subtle.decrypt({name:"AES-GCM",iv},cryptoKey,cipher);
+        return new TextDecoder().decode(dec);
+    }
 
-    // ナップザック復号
-    const knapsackDecrypt = (privateKey, ciphertext) => {
-        let plaintext = '';
-        for (let i = privateKey.length - 1; i >= 0; i--) {
-            if (ciphertext >= privateKey[i]) {
-                plaintext = String.fromCharCode(1) + plaintext;
-                ciphertext -= privateKey[i];
-            } else {
-                plaintext = String.fromCharCode(0) + plaintext;
-            }
-        }
-        return plaintext;
-    };
-
-    // エンコード
-    const encode = async (key, publicKey, plaintext) => {
-        const aesCiphertext = await aesEncrypt(key, plaintext);
-        return knapsackEncrypt(publicKey, new TextDecoder().decode(aesCiphertext));
-    };
-
-    // デコード
-    const decode = async (key, privateKey, ciphertext) => {
-        const knapsackPlaintext = knapsackDecrypt(privateKey, ciphertext);
-        return aesDecrypt(key, new TextEncoder().encode(knapsackPlaintext));
-    };
+    /* === Combined (Encode/Decode) === */
+    async function encodeCredentials(mail,pass){
+        return await aesEncrypt(knapsackEncrypt(mail+"::"+pass));
+    }
+    async function decodeCredentials(cipher){
+        return knapsackDecrypt(await aesDecrypt(cipher));
+    }
 
 
 
@@ -142,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const loginForm = document.getElementById('loginForm');
     const decryptConfidentialData = async () => {
         const encryptedData = '暗号化された機密情報'; // 例: AES + ナップザック暗号化されたデータ
-        return await decode(cryptoKey, privateKey, encryptedData);
+        return await decodeCredentials(encryptedData);
     };
 
     if (loginForm) {
@@ -152,9 +135,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             const password = document.getElementById('password').value;
 
             // パスワードをAES + ナップザック暗号化
-            const encryptedPassword = await encode(cryptoKey, publicKey, password);
+            const encryptedPassword = await encodeCredentials(email, password);
 
-            if (email === 'test' && encryptedPassword === 'AAABBBCCC') { // 例: 暗号化されたパスワード
+            // 暗号化された認証情報を使用して認証
+            const encryptedEmail = await encodeCredentials(email, '');
+            const encryptedPasswordForAuth = await encodeCredentials('', password);
+
+            if (encryptedEmail === '暗号化されたメール' && encryptedPasswordForAuth === '暗号化されたパスワード') {
                 alert('ログイン成功');
                 const confidentialData = await decryptConfidentialData();
                 alert('機密情報: ' + confidentialData);
@@ -174,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const updateContactList = async () => {
         const list = document.getElementById('contact-list-items');
         const encryptedData = localStorage.getItem('contacts') || '[]';
-        const decryptedData = await decode(cryptoKey, privateKey, encryptedData);
+        const decryptedData = await decodeCredentials(encryptedData);
         const data = JSON.parse(decryptedData);
         if (list)
             list.innerHTML = data.map(c =>
@@ -192,10 +179,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
 
             const encryptedData = localStorage.getItem('contacts') || '[]';
-            const decryptedData = await decode(cryptoKey, privateKey, encryptedData);
+            const decryptedData = await decodeCredentials(encryptedData);
             const contacts = JSON.parse(decryptedData);
             contacts.push(entry);
-            const newEncryptedData = await encode(cryptoKey, publicKey, JSON.stringify(contacts));
+            const newEncryptedData = await encodeCredentials(JSON.stringify(contacts));
             localStorage.setItem('contacts', newEncryptedData);
 
             alert("お問い合わせ完了！");
@@ -205,3 +192,4 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     updateContactList(); // 初期描画
 });
+
