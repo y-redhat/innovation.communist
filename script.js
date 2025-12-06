@@ -150,7 +150,7 @@ updateContactList();
 
 // ... (ここは現状でOK)
 
-});
+
 
 
 
@@ -159,47 +159,4 @@ updateContactList();
 ============================================================ */
 ...
 
-
-    
-
-
-    /* ============================================================
-       6) お問い合わせフォーム（AES + ナップザック暗号対応）
-    ============================================================ */
-    const contactForm = document.getElementById('contactForm');
-
-    const updateContactList = async () => {
-        const list = document.getElementById('contact-list-items');
-        const encryptedData = localStorage.getItem('contacts') || '[]';
-        const decryptedData = await decodeCredentials(encryptedData);
-        const data = JSON.parse(decryptedData);
-        if (list)
-            list.innerHTML = data.map(c =>
-                `<li><strong>${c.name}</strong> (${c.email}) : ${c.message}</li>`
-            ).join('');
-    };
-
-    if (contactForm) {
-        contactForm.addEventListener('submit', async e => {
-            e.preventDefault();
-            const entry = {
-                name: contactForm.name.value,
-                email: contactForm.email.value,
-                message: contactForm.message.value
-            };
-
-            const encryptedData = localStorage.getItem('contacts') || '[]';
-            const decryptedData = await decodeCredentials(encryptedData);
-            const contacts = JSON.parse(decryptedData);
-            contacts.push(entry);
-            const newEncryptedData = await encodeCredentials(JSON.stringify(contacts));
-            localStorage.setItem('contacts', newEncryptedData);
-
-            alert("お問い合わせ完了！");
-            await updateContactList();
-        });
-    }
-
-    updateContactList(); // 初期描画
-});
 
