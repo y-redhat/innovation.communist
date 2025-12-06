@@ -1,18 +1,18 @@
 document.addEventListener('DOMContentLoaded', async () => {
 
 /* ============================================================
-   1) スクロールアニメーション
+ 1) スクロールアニメーション
 ============================================================ */
 const revealSections = document.querySelectorAll('section');
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = '1';
-            entry.target.style.transform = 'translateY(0)';
-            observer.unobserve(entry.target);
+const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+        if(e.isIntersecting){
+            e.target.style.opacity='1';
+            e.target.style.transform='translateY(0)';
+            observer.unobserve(e.target);
         }
     });
-},{ threshold: 0.2 });
+},{ threshold:0.2 });
 
 revealSections.forEach(sec=>{
     sec.style.opacity='0';
@@ -22,17 +22,18 @@ revealSections.forEach(sec=>{
 
 
 /* ============================================================
-   2) 参加ボタン
+ 2) 参加ボタン
 ============================================================ */
-const joinBtn = document.querySelector('.join-btn');
-if (joinBtn) joinBtn.addEventListener('click', ()=> alert('登録ページへ移動します'));
+const joinBtn=document.querySelector('.join-btn');
+if(joinBtn) joinBtn.addEventListener('click',()=> alert('登録ページへ移動します'));
 
 
 /* ============================================================
-   3) サイドバー
+ 3) サイドバー UI
 ============================================================ */
-const sidebar = document.querySelector('.sidebar');
+const sidebar=document.querySelector('.sidebar');
 let sidebarTimeout;
+
 sidebar.addEventListener('mouseenter',()=>{
     clearTimeout(sidebarTimeout);
     sidebar.style.right='0';
@@ -46,7 +47,7 @@ document.addEventListener('touchstart',e=>{
 
 
 /* ============================================================
-   4) Python暗号をJSで復号 → ログイン
+ 4) Python暗号 → JS復号（ログイン認証）
 ============================================================ */
 async function decryptPyCipher(b64,password){
     const SALT_LEN=32,NONCE_LEN=24,DK_LEN=96,ITER=200000;
@@ -76,10 +77,13 @@ async function decryptPyCipher(b64,password){
     return new TextDecoder().decode(cipher.map((v,i)=>v^(ks[i%64])));
 }
 
-// 🔐 管理時のみPythonで新暗号文を作り貼り替える
-const CIPHER_TEXT = "YBYlmzr5qKT+D4yEQ75LtlrcdgSsQnUH+EBma2SVyHet9VAwd7RSitOjWWlqnONHa60qwo2HLbfHc0yQS4XbWn047YFb5d8cMaf8DWaO0iwqrw92pHkDjF0g+MZ9FoWFJ6edKmye7x7JVFtCr6vnShoSYgn0FkkFKkv8Bf+PGnA=";
 
-document.getElementById("loginForm").addEventListener("submit", async e=>{
+// 🔑 Pythonで生成した暗号文だけ保持
+const CIPHER_TEXT="YBYlmzr5qKT+D4yEQ75LtlrcdgSsQnUH+EBma2SVyHet9VAwd7RSitOjWWlqnONHa60qwo2HLbfHc0yQS4XbWn047YFb5d8cMaf8DWaO0iwqrw92pHkDjF0g+MZ9FoWFJ6edKmye7x7JVFtCr6vnShoSYgn0FkkFKkv8Bf+PGnA=";
+
+// 🔐 ログインフォーム
+const form=document.getElementById("loginForm");
+if(form) form.addEventListener("submit",async e=>{
     e.preventDefault();
     const inputPass=document.getElementById("password").value;
     const result=await decryptPyCipher(CIPHER_TEXT,inputPass);
@@ -89,6 +93,16 @@ document.getElementById("loginForm").addEventListener("submit", async e=>{
         location.href="home.html";
     }else alert("❌ パスワードが違います");
 });
+
+
+/* ============================================================
+ 6) お問い合わせフォーム（あなたの記述そのまま保持）
+============================================================ */
+
+// ... (ここは現状でOK)
+
+});
+
 
 
 /* ============================================================
