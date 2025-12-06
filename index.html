@@ -6,6 +6,14 @@
     <title>Innovation Communisty</title>
     <link rel="stylesheet" href="styles.css">
     <script src="script.js" defer></script>
+    <!-- MermaidJS for Graph Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({ startOnLoad: true });</script>
+<!-- MermaidJS for Graph Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+      mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
 </head>
 <body>
     <header>
@@ -14,6 +22,7 @@
     <nav>
         <a href="#about">このサイトについて</a>
         <a href="#objects">オブジェクト一覧</a>
+        <a href="#graph">思想系統図</a>
         <a href="#join">参加方法</a>
         <a href="#contact">お問い合わせ</a>
     </nav>
@@ -22,50 +31,100 @@
             <h2>このサイトについて</h2>
             <p>Innovation Communistyへようこそ！革新的な共産主義について議論するオープンチャットコミュニティです。</p>
         </section>
-        <section id="objects">
+
+<section id="graph">
+  <h2>共産主義思想系統図</h2>
+  <div class="graph-container">
+  ```mermaid
+graph TD
+    共産主義 --> マルクス主義系統
+    共産主義 --> 非マルクス主義系統
+    マルクス主義系統 --> マルクスレーニン主義
+    マルクスレーニン主義 --> スターリン主義
+    マルクスレーニン主義 --> 毛沢東思想
+    マルクスレーニン主義 --> トロツキズム
+    マルクスレーニン主義 --> ユーゴスラビア型
+    非マルクス主義系統 --> アナルココミュニズム
+    非マルクス主義系統 --> ユートピアンコミュニズム
+    非マルクス主義系統 --> 現代派生型
+    現代派生型 --> エコロジカル
+    現代派生型 --> リバタリアン
+    現代派生型 --> フェミニスト
+    現代派生型 --> デジタル
+    ユーゴスラビア型 -.->|自主管理| 労働者自治
+    毛沢東思想 -.->|文化革命| 大衆路線
+    アナルココミュニズム -.->|国家否定| 直接民主制
+  ```
+  </div>
+</section>
+<section id="objects">
             <h2>オブジェクト一覧</h2>
             <div class="object">
                 <h3>IC-001</h3>
                 <p><strong>オブジェクトクラス:</strong> Safe</p>
                 <p><strong>説明:</strong> 革新的な経済モデルに関する提案。</p>
-                <p><strong>プロトコル:</strong> このオブジェクトは、承認されたメンバーのみがアクセス可能です。</p>
+                <p><strong>プロトコル:</strong> 承認されたメンバーのみアクセス可能。</p>
             </div>
             <div class="object">
                 <h3>IC-002</h3>
                 <p><strong>オブジェクトクラス:</strong> Euclid</p>
                 <p><strong>説明:</strong> 新しい社会構造の実験的モデル。</p>
-                <p><strong>プロトコル:</strong> このオブジェクトは、厳重な監視下に置かれています。</p>
+                <p><strong>プロトコル:</strong> 厳重な監視下で運用されています。</p>
             </div>
         </section>
+
+        <section id="graph">
+            <h2>共産主義思想系統図</h2>
+            <div class="mermaid">
+            graph TD
+                %% 主要分類
+                共産主義 --> マルクス主義系統
+                共産主義 --> 非マルクス主義系統
+                %% マルクス主義系統
+                マルクス主義系統 --> マルクスレーニン主義
+                マルクスレーニン主義 --> スターリン主義
+                マルクスレーニン主義 --> 毛沢東思想
+                マルクスレーニン主義 --> トロツキズム
+                マルクスレーニン主義 --> ユーゴスラビア型
+                %% 非マルクス主義系統
+                非マルクス主義系統 --> アナルココミュニズム
+                非マルクス主義系統 --> ユートピアンコミュニズム
+                非マルクス主義系統 --> 現代派生型
+                %% 現代派生型
+                現代派生型 --> エコロジカル
+                現代派生型 --> リバタリアン
+                現代派生型 --> フェミニスト
+                現代派生型 --> デジタル
+                %% 特徴追加
+                ユーゴスラビア型 -.->|自主管理| 労働者自治
+                毛沢東思想 -.->|文化革命| 大衆路線
+                アナルココミュニズム -.->|国家否定| 直接民主制
+            </div>
+        </section>
+
         <section id="join">
             <h2>参加方法</h2>
             <p>新規登録は以下のボタンから</p>
             <button class="join-btn">今すぐ参加</button>
         </section>
+
         <section id="contact">
             <h2>お問い合わせ</h2>
             <p>連絡先: contact@innovation.communist</p>
         </section>
     </div>
+
     <footer>
         <p>&copy; 2025 Innovation Communist Community</p>
     </footer>
+
     <div class="sidebar">
         <a href="#about">About</a>
         <a href="#objects">Objects</a>
+        <a href="#graph">Graph</a>
         <a href="#join">Join</a>
         <a href="#contact">Contact</a>
     </div>
-    <div id="loginFormContainer">
-        <form id="loginForm">
-            <h2>ログイン</h2>
-            <label for="username">ユーザー名:</label>
-            <input type="text" id="username" name="username" required>
-            <label for="password">パスワード:</label>
-            <input type="password" id="password" name="password" required>
-            <button type="submit">ログイン</button>
-            <p id="loginResult"></p>
-        </form>
-    </div>
 </body>
 </html>
+
