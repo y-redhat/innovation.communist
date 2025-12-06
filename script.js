@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     /* ================================
        🔐 ログイン認証
     ================================== */
-    const CIPHER_TEXT = "YBYlmzr5qKT+D4yEQ75LtlrcdgSsQnUH+EBma2SVyHet9VAwd7RSitOjWWlqnONHa60qwo2HLbfHc0yQS4XbWn047YFb5d8cMaf8DWaO0iwqrw92pHkDjF0g+MZ9FoWFJ6edKmye7x7JVFtCr6vnShoSYgn0FkkFKkv8Bf+PGnA=";
+    const CIPHER_TEXT = "c+Okz1wWJRyjgpVmHpSzwb+JA3Bmmde8QhyFrhl/zaODF8HNHhRnBya4BAZAyCYMoMhZYMf2iHkkt5OAfqjRsN/vAjLK+gDzx4WcPWiG8rW7fZvRihliF+Zx0QkT0j7L/nt6NDzdnYtvdNp2Lm8kaksM7HsJ0TYoVPHVXFg3UVQ=";
 
     document.getElementById("loginForm")?.addEventListener("submit", async e => {
         e.preventDefault();
