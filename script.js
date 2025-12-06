@@ -94,8 +94,9 @@ async function decryptPyCipher(b64,password){
 /* ================================
     🔐 ログイン認証
 ================================== */
-const CIPHER_TEXT="YBYlmzr5qKT+D4yEQ75LtlrcdgSsQnUH+EBma2SVyHet9VAwd7RSitOjWWlqnONHa60qwo2HLbfHc0yQS4XbWn047YFb5d8cMaf8DWaO0iwqrw92pHkDjF0g+MZ9FoWFJ6edKmye7x7JVFtCr6vnShoSYgn0FkkFKkv8Bf+PGnA=";
 
+
+const CIPHER_TEXT="YBYlmzr5qKT+D4yEQ75LtlrcdgSsQnUH+EBma2SVyHet9VAwd7RSitOjWWlqnONHa60qwo2HLbfHc0yQS4XbWn047YFb5d8cMaf8DWaO0iwqrw92pHkDjF0g+MZ9FoWFJ6edKmye7x7JVFtCr6vnShoSYgn0FkkFKkv8Bf+PGnA=";
 document.getElementById("loginForm")?.addEventListener("submit",async e=>{
     e.preventDefault();
     const pass=document.getElementById("password").value;
@@ -104,8 +105,11 @@ document.getElementById("loginForm")?.addEventListener("submit",async e=>{
     if(result==="ALLOW_LOGIN"){
         alert("✔ ログイン成功");
         location.href="home.html";
-    }else alert("❌ パスワードが違います");
+    }else{
+        alert("❌ パスワードが違います");
+    }
 });
+   
 
 
 /* ============================================================
