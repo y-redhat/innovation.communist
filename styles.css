@@ -1,104 +1,153 @@
-/* ==== 共産主義風・ルビーレッドUIテーマ ==== */
-
+/* ==================================
+   Global Theme Variables
+================================== */
 :root {
-  --red-main: #b30000;
-  --red-dark: #7a0000;
-  --red-blood: #8a0000;
-  --yellow-star: #ffd52d;
-  --cream-paper: #fff2d0;
-  --black-ink: #1a1a1a;
+  --primary: #c8102e;
+  --primary-dark: #8a0b1f;
+  --text: #212529;
+  --bg: #f8f9fa;
+  --radius: 10px;
+  --shadow: 0 2px 15px rgba(0,0,0,0.08);
+}
+
+/* ==================================
+   Base
+================================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-  font-family: 'Noto Sans JP', 'Segoe UI', sans-serif;
-  background-color: var(--red-main);
-  color: var(--cream-paper);
-  margin: 0;
-  padding: 0;
-  line-height: 1.78;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
 }
 
-/* ===== 旗を思わせるトップ ===== */
+/* ==================================
+   Header / Nav
+================================== */
 header {
-  background: linear-gradient(125deg, var(--red-main), var(--red-dark));
-  color: var(--yellow-star);
-  padding: 2.8rem 1rem;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  padding: 2.5rem 1rem;
   text-align: center;
-  font-size: 2.3rem;
-  font-weight: bold;
-  letter-spacing: 2px;
-  border-bottom: 4px solid var(--yellow-star);
+  font-size: 1.8rem;
+  font-weight: 700;
+  box-shadow: var(--shadow);
 }
 
-/* ===== ナビゲーション ===== */
 nav {
   display: flex;
   justify-content: center;
   gap: 2rem;
-  padding: 1rem 0;
-  background-color: var(--red-blood);
-  border-bottom: 4px solid var(--yellow-star);
+  background: #fff;
+  padding: 1rem;
+  box-shadow: var(--shadow);
 }
+
 nav a {
-  color: var(--yellow-star);
-  font-weight: 700;
+  color: var(--primary);
+  font-weight: 600;
   text-decoration: none;
-  padding-bottom: .3rem;
-  transition: .3s;
+  transition: 0.3s;
 }
+
 nav a:hover {
-  color: white;
-  border-bottom: 2px solid white;
+  color: var(--primary-dark);
+  transform: translateY(-2px);
 }
 
-/* ===== 各セクションはプロパガンダポスターの紙質風 ===== */
+/* ==================================
+   Main Layout
+================================== */
+.content {
+  max-width: 1100px;
+  margin: 3rem auto;
+  padding: 0 1.5rem;
+}
+
 section {
-  background: var(--cream-paper);
-  color: var(--black-ink);
-  margin: 2rem auto;
+  background: #fff;
   padding: 2rem;
-  width: min(1100px, 90%);
-  border-left: 12px solid var(--yellow-star);
-  box-shadow: 0 0 25px rgba(0,0,0,0.25);
-  animation: fadeUp 0.8s ease;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 3rem;
+  opacity: 0;
+  animation: fade-in 0.6s ease forwards;
 }
 
-/* ===== ボタンは赤と金で強調 ===== */
+section:not(:first-child) {
+  animation-delay: 0.2s;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(25px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ==================================
+   Buttons
+================================== */
 .join-btn {
-  background: var(--red-main);
-  border: 3px solid var(--yellow-star);
-  color: var(--yellow-star);
-  padding: 1rem 2rem;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 0.9rem 1.8rem;
+  border-radius: var(--radius);
   font-weight: bold;
   cursor: pointer;
-  font-size: 1.1rem;
-  transition: .25s;
+  transition: 0.3s;
 }
+
 .join-btn:hover {
-  background: var(--yellow-star);
-  color: var(--red-main);
-  transform: scale(1.05);
+  background: var(--primary-dark);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow);
 }
 
-/* ===== フッター ===== */
-footer {
-  text-align: center;
-  padding: 1.4rem;
-  background-color: var(--black-ink);
-  color: var(--yellow-star);
-  margin-top: 3rem;
+/* ==================================
+   Sidebar (UX改善: hover→click式)
+================================== */
+.sidebar {
+  position: fixed;
+  top: 0; right: -300px;
+  width: 300px; height: 100vh;
+  background: #111;
+  color: white;
+  padding-top: 4rem;
+  transition: right 0.4s ease;
+  z-index: 1000;
 }
 
-/* ===== アニメーション ===== */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px);} 
-  to { opacity:1; transform: translateY(0);} 
+.sidebar a {
+  display: block;
+  padding: 1.2rem;
+  color: white;
+  text-decoration: none;
+  border-bottom: 1px solid #333;
 }
 
-/* ==== スマホ対応 ==== */
-@media (max-width: 680px) {
+.sidebar.open { right: 0; }
+
+/* トグルボタン */
+.sidebar-toggle {
+  position: fixed;
+  right: 15px; top: 15px;
+  background: var(--primary);
+  color: white;
+  padding: 0.7rem 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  z-index: 1500;
+}
+
+/* ==================================
+   Responsive
+================================== */
+@media (max-width: 768px) {
   nav { flex-wrap: wrap; gap: 1rem; }
-  header { font-size: 1.8rem; padding: 2rem 1rem; }
-  section { padding: 1.4rem; }
-  .join-btn { width: 100%; text-align: center; }
+  .sidebar { width: 80%; }
 }
