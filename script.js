@@ -66,60 +66,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     /* ============================================================
        4) 解読Js 
     ============================================================ */
-    async function decryptPyCipher(b64, password) {
-    const SALT_LEN = 32;
-    const NONCE_LEN = 24;
-    const DK_LEN = 96;
-    const ITER = 200000;
+    document.addEventListener('DOMContentLoaded', () => {
 
-    function pbkdf2(pass, salt, len) {
-        return crypto.subtle.importKey(
+async function decryptPyCipher(b64, password) {
+    const SALT_LEN = 32, NONCE_LEN = 24, DK_LEN = 96, ITER = 200000;
+
+    const raw = Uint8Array.from(atob(b64), c=>c.charCodeAt(0));
+    const salt = raw.slice(0,SALT_LEN);
+    const nonce= raw.slice(SALT_LEN,SALT_LEN+NONCE_LEN);
+    const cipher=raw.slice(SALT_LEN+NONCE_LEN, raw.length-64);
+    const tag  = raw.slice(raw.length-64);
+
+    async function pbkdf2(pass,salt,len){
+        const key = await crypto.subtle.importKey(
             "raw", new TextEncoder().encode(pass),
-            { name: "PBKDF2" }, false, ["deriveBits"]
-        ).then(key =>
-            crypto.subtle.deriveBits(
-                { name: "PBKDF2", salt, iterations: ITER, hash: "SHA-256" },
-                key,
-                len * 8
-            )
+            {name:"PBKDF2"},false,["deriveBits"]
         );
+        return crypto.subtle.deriveBits(
+            {name:"PBKDF2",salt,iterations:ITER,hash:"SHA-256"},key,len*8);
     }
+    const master = new Uint8Array(await pbkdf2(password,salt,DK_LEN));
+    const encKey = master.slice(0,48), macKey = master.slice(48,96);
 
-    function sha512(data) {
-        return crypto.subtle.digest("SHA-512", data);
-    }
+    // HMAC検証
+    const tagCheck = new Uint8Array(await crypto.subtle.sign(
+        "HMAC",
+        await crypto.subtle.importKey("raw",macKey,{name:"HMAC",hash:"SHA-512"},false,["sign"]),
+        new Uint8Array([...salt,...nonce,...cipher])
+    ));
+    if(!tag.every((v,i)=>v===tagCheck[i])) return null;
 
-    function hmacSha512(key, data) {
-        return crypto.subtle.importKey(
-            "raw", key,
-            { name: "HMAC", hash: "SHA-512" },
-            false, ["sign"]
-        ).then(k => crypto.subtle.sign("HMAC", k, data));
-    }
-
-    // ======= 復号処理 =======
-    const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-
-    const salt = raw.slice(0, SALT_LEN);
-    const nonce = raw.slice(SALT_LEN, SALT_LEN + NONCE_LEN);
-    const cipher = raw.slice(SALT_LEN + NONCE_LEN, raw.length - 64);
-    const tag = raw.slice(raw.length - 64);
-
-    const master = new Uint8Array(await pbkdf2(password, salt, DK_LEN));
-    const encKey = master.slice(0, 48);
-    const macKey = master.slice(48, 96);
-
-    // MAC検証
-    const tag2 = new Uint8Array(await hmacSha512(macKey, new Uint8Array([...salt, ...nonce, ...cipher])));
-    if (!tag.every((v, i) => v === tag2[i])) return "❌ 失敗：パスワード or データ不一致";
-
-    // 512bitストリームでXOR復号
-    const ksHash = await sha512(new Uint8Array([...encKey, ...nonce]));
-    const ks = new Uint8Array(ksHash);
-    const plain = cipher.map((v, i) => v ^ ks[i % 64]);
-
-    return new TextDecoder().decode(plain);
+    // 復号
+    const ks = new Uint8Array(await crypto.subtle.digest("SHA-512", new Uint8Array([...encKey,...nonce])));
+    return new TextDecoder().decode(cipher.map((v,i)=>v^(ks[i%64])));
 }
+
+
+
 //呼び出し方:
     //decryptPyCipher(cipherText, pass).then(output => {
     //alert("復号結果 = " + output);
@@ -135,17 +118,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 ================================== */
 //呼び出したとする
 //メンバー実装はここで暗号化した状態で入れる
-    async function check() {
-    const result = await decryptPyCipher(cipher, password);
+    /* === 🔐 ログイン判定（PWのみ認証） === */
 
-    if(result === "YBYlmzr5qKT+D4yEQ75LtlrcdgSsQnUH+EBma2SVyHet9VAwd7RSitOjWWlqnONHa60qwo2HLbfHc0yQS4XbWn047YFb5d8cMaf8DWaO0iwqrw92pHkDjF0g+MZ9FoWFJ6edKmye7x7JVFtCr6vnShoSYgn0FkkFKkv8Bf+PGnA=") {
-        alert("✔ 正しいパスワード こちらのurlへどうぞ");
+// ★パスワード変更時 → Pythonで新しい暗号文を作ってここに貼る
+const CIPHER_TEXT = "YBYlmzr5qKT+D4yEQ75LtlrcdgSsQnUH+EBma2SVyHet9VAwd7RSitOjWWlqnONHa60qwo2HLbfHc0yQS4XbWn047YFb5d8cMaf8DWaO0iwqrw92pHkDjF0g+MZ9FoWFJ6edKmye7x7JVFtCr6vnShoSYgn0FkkFKkv8Bf+PGnA=";
+
+document.getElementById("loginForm").addEventListener("submit", async e=>{
+    e.preventDefault();
+
+    const inputPass = document.getElementById("password").value;
+    const result = await decryptPyCipher(CIPHER_TEXT, inputPass);
+
+    if(result === "ALLOW_LOGIN"){   // ← 暗号化された平文と比較、一致で通過
+        alert("✔ 認証成功！ページを開きます");
+        location.href = "home.html"; // 認証後に飛ばすページ
     } else {
-        alert("パスワード、メールアドレスのどちらかもしくは両方違います");
+        alert("❌ パスワードが違います");
     }
-}
+});
 
-check();  // async関数なので必ず呼び出す
+});
+
+}
 
 
     
